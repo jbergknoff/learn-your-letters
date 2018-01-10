@@ -1,0 +1,24 @@
+<!doctype>
+<html>
+<head>
+	<meta charset="utf-8">
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/react/16.2.0/umd/react.production.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.2.0/umd/react-dom.production.min.js"></script>
+	<style type="text/css">
+	@keyframes cooldown {
+		from { width: 20em; }
+		to { width: 0; }
+	}
+	</style>
+</head>
+<body>
+<div id="main"></div>
+<script type="text/javascript" src="./game.js"></script>
+<script type="text/javascript">
+ReactDOM.render(
+	React.createElement(Game),
+	document.getElementById("main")
+);
+</script>
+</body>
+</html>
