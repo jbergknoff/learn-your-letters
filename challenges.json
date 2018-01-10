@@ -1,0 +1,172 @@
+[
+	{
+		"value": "A",
+		"voice_aliases": [ "a", "hey" ],
+		"examples": [ "apple", "alligator" ]
+	},
+	{
+		"value": "B",
+		"voice_aliases": [ "b", "be" ],
+		"examples": [ "ball", "balloon" ]
+	},
+	{
+		"value": "C",
+		"voice_aliases": [ "c", "see"],
+		"examples": [ "cookie", "cat" ]
+	},
+	{
+		"value": "D",
+		"voice_aliases": [ "d" ],
+		"examples": [ "dog", "drawing" ]
+	},
+	{
+		"value": "E",
+		"voice_aliases": [ "e" ],
+		"examples": [ "elephant", "egg" ]
+	},
+	{
+		"value": "F",
+		"voice_aliases": [ "f" ],
+		"examples": [ "fish", "face" ]
+	},
+	{
+		"value": "G",
+		"voice_aliases": [ "g" ],
+		"examples": [ "garden", "green", "guitar" ]
+	},
+	{
+		"value": "H",
+		"voice_aliases": [ "h" ],
+		"examples": [ "hammer", "hat" ]
+	},
+	{
+		"value": "I",
+		"voice_aliases": [ "i", "eye", "hi" ],
+		"examples": [ "ice cream", "igloo" ]
+	},
+	{
+		"value": "J",
+		"voice_aliases": [ "j", "jay" ],
+		"examples": [ "juggler", "juice" ]
+	},
+	{
+		"value": "K",
+		"voice_aliases": [ "k" ],
+		"examples": [ "kite", "king" ]
+	},
+	{
+		"value": "L",
+		"voice_aliases": [ "l" ],
+		"examples": [ "lemonade", "ladder" ]
+	},
+	{
+		"value": "M",
+		"voice_aliases": [ "m" ],
+		"examples": [ "moon", "macaroni" ]
+	},
+	{
+		"value": "N",
+		"voice_aliases": [ "n" ],
+		"examples": [ "nail", "nest" ]
+	},
+	{
+		"value": "O",
+		"voice_aliases": [ "o", "oh" ],
+		"examples": [ "octopus", "ostrich" ]
+	},
+	{
+		"value": "P",
+		"voice_aliases": [ "p", "pee" ],
+		"examples": [ "pencil", "penguin" ]
+	},
+	{
+		"value": "Q",
+		"voice_aliases": [ "q", "cue", "queue", "cute" ],
+		"examples": [ "queen", "quail" ]
+	},
+	{
+		"value": "R",
+		"voice_aliases": [ "r", "are" ],
+		"examples": [ "rainbow", "red" ]
+	},
+	{
+		"value": "S",
+		"voice_aliases": [ "s" ],
+		"examples": [ "snake", "stilts" ]
+	},
+	{
+		"value": "T",
+		"voice_aliases": [ "t", "tee", "tea" ],
+		"examples": [ "train", "tools" ]
+	},
+	{
+		"value": "U",
+		"voice_aliases": [ "u", "you" ],
+		"examples": [ "umbrella", "underwear" ]
+	},
+	{
+		"value": "V",
+		"voice_aliases": [ "v" ],
+		"examples": [ "violin", "velvet" ]
+	},
+	{
+		"value": "W",
+		"voice_aliases": [ "w", "double you" ],
+		"examples": [ "white", "web" ]
+	},
+	{
+		"value": "X",
+		"voice_aliases": [ "x" ],
+		"examples": [ "x-ray", "xylophone" ]
+	},
+	{
+		"value": "Y",
+		"voice_aliases": [ "y", "why" ],
+		"examples": [ "yacht", "yellow" ]
+	},
+	{
+		"value": "Z",
+		"voice_aliases": [ "z", "zedd" ],
+		"examples": [ "zebra", "zoom" ]
+	},
+	{
+		"value": "0",
+		"voice_aliases": [ "0" ]
+	},
+	{
+		"value": "1",
+		"voice_aliases": [ "1" ]
+	},
+	{
+		"value": "2",
+		"voice_aliases": [ "2" ]
+	},
+	{
+		"value": "3",
+		"voice_aliases": [ "3" ]
+	},
+	{
+		"value": "4",
+		"voice_aliases": [ "4" ]
+	},
+	{
+		"value": "5",
+		"voice_aliases": [ "5" ]
+	},
+	{
+		"value": "6",
+		"voice_aliases": [ "6", "sex" ]
+	},
+	{
+		"value": "7",
+		"voice_aliases": [ "7" ]
+	},
+	{
+		"value": "8",
+		"voice_aliases": [ "8" ]
+	},
+	{
+		"value": "9",
+		"voice_aliases": [ "9" ]
+	}
+]
