@@ -4,7 +4,7 @@ const random_choice = (list) => {
 	return list[~~(Math.random() * list.length)];
 };
 
-const BigLetter = (props) => {
+const ChallengeDisplay = (props) => {
 	const styles = {
 		position: "fixed",
 		left: 0,
@@ -17,21 +17,60 @@ const BigLetter = (props) => {
 		alignItems: "center",
 		justifyContent: "center",
 		fontSize: "30em",
+		color: props.victory ? "blue" : "black"
 	};
 
 	return React.createElement("div", { style: styles }, props.value);
 };
 
-const Transcript = (props) => {
-	const styles = {
-		position: "fixed",
-		left: "1em",
-		bottom: "1em",
-		fontSize: "3em",
-		animation: `fadeout ${props.transcript.timeout_ms}ms ease`
-	};
+class Transcript extends React.Component {
+	shouldComponentUpdate(new_props) {
+		return new_props.transcript.text != this.props.transcript.text;
+	}
 
-	return React.createElement("div", { style: styles }, `Heard: ${props.transcript.text}`);
+	render() {
+		const styles = {
+			position: "absolute",
+			left: "1em",
+			bottom: "1em",
+			fontSize: "3em",
+			animation: `fade-out ${this.props.transcript.timeout_ms}ms ease`
+		};
+
+		return React.createElement("div", { style: styles }, `Heard: ${this.props.transcript.text}`);
+	}
+}
+
+class Smiley extends React.Component {
+	shouldComponentUpdate() {
+		return false;
+	}
+
+	render() {
+		const timeout_ms = 2000;
+		const horizontal = Math.random() < 0.5;
+		const scroll_animation = `${horizontal ? "horizontal" : "vertical" }-scroll ${timeout_ms}ms linear ${Math.random() < 0.5 ? "reverse" : "" }`;
+		const rotate_animation = `rotate ${timeout_ms}ms linear`;
+
+		const styles = {
+			position: "fixed",
+			top: horizontal ? `${10 + ~~(80 * Math.random())}%` : "120%",
+			left: horizontal ? "-20%" : `${10 + ~~(80 * Math.random())}%`,
+			fontSize: "12em",
+			color: random_choice([ "red", "green", "coral", "brown", "springgreen" ]),
+			animation: `${scroll_animation}, ${rotate_animation}`
+		};
+
+		return React.createElement("div", { style: styles }, "\u{1F603}");
+	}
+};
+
+const ListeningIndicator = () => {
+	return React.createElement(
+		"div", { style: { position: "absolute", top: "1em", right: "1em", textAlign: "center" } },
+		React.createElement("div", { style: { fontSize: "6em" } }, "\u{1F399}"),
+		React.createElement("div", null, "Listening")
+	);
 };
 
 class Game extends React.Component {
@@ -42,23 +81,33 @@ class Game extends React.Component {
 			challenge: null,
 			speech_recognition_instance: null,
 			listening: false,
-			transcript: null
+			transcript: null,
+			victory: false,
+			page_hidden: false
 		};
 	}
 
 	pause_listening() {
-		if (this.state.speech_recognition_instance) {
-			this.state.speech_recognition_instance.abort();
+		if (!this.state.speech_recognition_instance) {
+			return;
 		}
+
+		this.state.speech_recognition_instance.abort();
 	}
 
 	resume_listening() {
-		if (this.state.speech_recognition_instance && !this.state.listening) {
-			try {
-				this.state.speech_recognition_instance.start();
-			} catch (e) {
-				console.log("Failed to start listening:", e);
-			}
+		if (!this.state.speech_recognition_instance || this.state.listening) {
+			return;
+		}
+
+		if (this.state.page_hidden) {
+			return;
+		}
+
+		try {
+			this.state.speech_recognition_instance.start();
+		} catch (e) {
+			console.log("Failed to start listening:", e);
 		}
 	}
 
@@ -98,7 +147,7 @@ class Game extends React.Component {
 		}
 
 		const type = /^[A-Z]$/.test(challenge.value) ? "letter" : "number";
-		this.setState({ challenge: challenge });
+		this.setState({ challenge: challenge, victory: false });
 		this.speak({ text: `What ${type} is this?` });
 	}
 
@@ -116,8 +165,8 @@ class Game extends React.Component {
 		}
 
 		// Sometimes the speech recognition is spotty for short utterances, so let people say
-		// "it's a t" or "it's an r", as well.
-		const extracted_value = (/^it's an? (.+)$/.exec(raw_transcript) || {})[1];
+		// "it's a t" or "it's an r" or "it's d" or "that's an x", as well.
+		const extracted_value = (/^(?:tha|i)t'?s(?: an?)? (.+)$/.exec(raw_transcript) || {})[1];
 		const transcript = extracted_value || raw_transcript;
 		if (!this.state.challenge.voice_aliases.includes(transcript)) {
 			this.speak({ text: "Sorry, that's not it", pitch: 0.8 });
@@ -125,15 +174,19 @@ class Game extends React.Component {
 			return;
 		}
 
-		const example = this.state.challenge.examples ? ` like ${random_choice(this.state.challenge.examples)}` : "";
+		const example = this.state.challenge.examples ? ` for ${random_choice(this.state.challenge.examples)}` : "";
+		const congratulations = [ "great", "well done", "good job", "way to go", "perfect", "that's right" ]
 		this.speak(
-			{ text: `Great! It's ${this.state.challenge.value}${example}`, pitch: 1.1 },
+			{ text: `${random_choice(congratulations)}! It's ${this.state.challenge.value}${example}`, pitch: 1.1 },
 			setTimeout.bind(null, this.set_challenge.bind(this), 300)
 		);
+
+		this.setState({ victory: true });
 	}
 
 	listen_for_input() {
 		const recognition = new webkitSpeechRecognition();
+		window.recognition = recognition; // TODO: does this work? Trying to deal with the recognition cutting out intermittently
 		recognition.continuous = true;
 		recognition.onresult = this.handle_speech.bind(this);
 		recognition.onstart = () => { this.setState({ listening: true }); };
@@ -145,8 +198,10 @@ class Game extends React.Component {
 
 	handle_visibility_change(event) {
 		if (event.type === "blur" || document.visibilityState === "hidden") {
+			this.setState({ page_hidden: true });
 			this.pause_listening();
 		} else if (event.type === "focus" || document.visibilityState === "visible") {
+			this.setState({ page_hidden: false });
 			this.resume_listening();
 		}
 	}
@@ -161,8 +216,8 @@ class Game extends React.Component {
 			.then(
 				(data) => {
 					this.setState({ challenge_pool: data });
-					this.set_challenge();
 					this.listen_for_input();
+					this.set_challenge();
 				}
 			);
 	}
@@ -170,8 +225,10 @@ class Game extends React.Component {
 	render() {
 		return React.createElement(
 			"div", null,
-			this.state.challenge ? React.createElement(BigLetter, { value: this.state.challenge.value }) : null,
-			this.state.transcript ? React.createElement(Transcript, { transcript: this.state.transcript }) : null
+			this.state.challenge ? React.createElement(ChallengeDisplay, { value: this.state.challenge.value, victory: this.state.victory }) : null,
+			this.state.listening ? React.createElement(ListeningIndicator) : null,
+			this.state.transcript ? React.createElement(Transcript, { transcript: this.state.transcript }) : null,
+			this.state.victory ? [ 1, 2, 3 ].map(() => React.createElement(Smiley)) : null
 		);
 	}
 }

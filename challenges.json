@@ -27,7 +27,7 @@
 	{
 		"value": "F",
 		"voice_aliases": [ "f" ],
-		"examples": [ "fish", "face" ]
+		"examples": [ "fish", "face", "flower" ]
 	},
 	{
 		"value": "G",
@@ -37,7 +37,7 @@
 	{
 		"value": "H",
 		"voice_aliases": [ "h" ],
-		"examples": [ "hammer", "hat" ]
+		"examples": [ "hammer", "hat", "house" ]
 	},
 	{
 		"value": "I",
