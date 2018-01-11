@@ -131,42 +131,42 @@
 	},
 	{
 		"value": "0",
-		"voice_aliases": [ "0" ]
+		"voice_aliases": [ "0", "zero" ]
 	},
 	{
 		"value": "1",
-		"voice_aliases": [ "1" ]
+		"voice_aliases": [ "1", "one", "won" ]
 	},
 	{
 		"value": "2",
-		"voice_aliases": [ "2" ]
+		"voice_aliases": [ "2", "two", "too", "to" ]
 	},
 	{
 		"value": "3",
-		"voice_aliases": [ "3" ]
+		"voice_aliases": [ "3", "three" ]
 	},
 	{
 		"value": "4",
-		"voice_aliases": [ "4" ]
+		"voice_aliases": [ "4", "four", "for" ]
 	},
 	{
 		"value": "5",
-		"voice_aliases": [ "5" ]
+		"voice_aliases": [ "5", "five" ]
 	},
 	{
 		"value": "6",
-		"voice_aliases": [ "6", "sex" ]
+		"voice_aliases": [ "6", "six", "sex" ]
 	},
 	{
 		"value": "7",
-		"voice_aliases": [ "7" ]
+		"voice_aliases": [ "7", "seven" ]
 	},
 	{
 		"value": "8",
-		"voice_aliases": [ "8" ]
+		"voice_aliases": [ "8", "eight", "ate" ]
 	},
 	{
 		"value": "9",
-		"voice_aliases": [ "9" ]
+		"voice_aliases": [ "9", "nine" ]
 	}
 ]

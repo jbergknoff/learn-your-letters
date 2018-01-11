@@ -38,7 +38,7 @@ class Transcript extends React.Component {
 			animation: `fade-out ${this.props.transcript.timeout_ms}ms ease`
 		};
 
-		return React.createElement("div", { style: styles }, `Heard: ${this.props.transcript.text}`);
+		return React.createElement("div", { style: styles }, this.props.transcript.text);
 	}
 }
 
@@ -61,44 +61,49 @@ const ListeningIndicator = () => {
 class Game extends React.Component {
 	constructor() {
 		super()
+
+		// These are internal state that don't directly affect the UI.
+		this.debug = true;
+		this.speech_recognition_instance = null;
+		this.challenge_pool = [];
+		this.waiting_for_input = false; // True if we're waiting for a challenge response
+		this.page_focused = true;
+
+		// These are elements of state which directly affect the UI.
 		this.state = {
-			challenge_pool: [],
-			challenge: null,
-			speech_recognition_instance: null,
-			listening: false,
-			transcript: null,
-			victory: false,
-			page_hidden: false
+			challenge: null, // The challenge currently being displayed
+			listening: false, // True if microphone is on
+			transcript: null, // Populated when showing a speech recognition transcript
+			victory: false // True while showing victory animation
 		};
 	}
 
 	pause_listening() {
-		if (!this.state.speech_recognition_instance) {
+		if (!this.speech_recognition_instance) {
 			return;
 		}
 
-		this.state.speech_recognition_instance.abort();
+		this.speech_recognition_instance.abort();
 	}
 
 	resume_listening() {
-		if (!this.state.speech_recognition_instance || this.state.listening) {
-			return;
-		}
-
-		if (this.state.page_hidden) {
+		if (!this.speech_recognition_instance || !this.page_focused || this.state.listening) {
 			return;
 		}
 
 		try {
-			this.state.speech_recognition_instance.start();
+			this.speech_recognition_instance.start();
 		} catch (e) {
-			console.log("Failed to start listening:", e);
+			if (this.debug) {
+				console.log("Failed to start listening:", e);
+			}
 		}
 	}
 
 	// options: object with
 	//		text: string
 	//		pitch: optional number between 0 and 2.
+	//		prompt: optional boolean (default false), whether to listen for a response after speaking
 	speak(options, callback) {
 		const utterance = new SpeechSynthesisUtterance(options.text);
 		// Workaround for Chrome garbage collection causing "end" event to fail to fire.
@@ -110,7 +115,10 @@ class Game extends React.Component {
 		}
 
 		utterance.onend = () => {
-			this.resume_listening();
+			if (options.prompt) {
+				this.waiting_for_input = true;
+				this.resume_listening();
+			}
 
 			if (callback) {
 				callback();
@@ -125,7 +133,7 @@ class Game extends React.Component {
 		const existing_challenge_value = (this.state.challenge || {}).value;
 		let challenge;
 		while (true) {
-			challenge = random_choice(this.state.challenge_pool);
+			challenge = random_choice(this.challenge_pool);
 			if (challenge.value !== existing_challenge_value) {
 				break;
 			}
@@ -133,7 +141,7 @@ class Game extends React.Component {
 
 		const type = /^[A-Z]$/.test(challenge.value) ? "letter" : "number";
 		this.setState({ challenge: challenge, victory: false });
-		this.speak({ text: `What ${type} is this?` });
+		this.speak({ text: `What ${type} is this?`, prompt: true });
 	}
 
 	set_transcript(transcript, timeout_ms) {
@@ -142,6 +150,7 @@ class Game extends React.Component {
 	}
 
 	handle_speech(event) {
+		this.waiting_for_input = false;
 		const raw_transcript = event.results[0][0].transcript.toLowerCase();
 
 		if (raw_transcript === "skip") {
@@ -154,8 +163,8 @@ class Game extends React.Component {
 		const extracted_value = (/^(?:tha|i)t'?s(?: an?)? (.+)$/.exec(raw_transcript) || {})[1];
 		const transcript = extracted_value || raw_transcript;
 		if (!this.state.challenge.voice_aliases.includes(transcript)) {
-			this.speak({ text: "Sorry, that's not it", pitch: 0.8 });
-			this.set_transcript(transcript, 3000);
+			this.speak({ text: "Sorry, that's not it", pitch: 0.8, prompt: true });
+			this.set_transcript(`Heard: ${transcript}`, 3000);
 			return;
 		}
 
@@ -169,24 +178,44 @@ class Game extends React.Component {
 		this.setState({ victory: true });
 	}
 
-	listen_for_input() {
+	setup_speech_recognition() {
 		const recognition = new webkitSpeechRecognition();
-		window.recognition = recognition; // TODO: does this work? Trying to deal with the recognition cutting out intermittently
-		recognition.continuous = true;
-		recognition.onresult = this.handle_speech.bind(this);
-		recognition.onstart = () => { this.setState({ listening: true }); };
-		recognition.onend = () => { this.setState({ listening: false }); };
-		recognition.onerror = () => { this.setState({ listening: false }); };
-		recognition.start();
-		this.setState({ speech_recognition_instance: recognition });
+		recognition.addEventListener("result", this.handle_speech.bind(this));
+		recognition.addEventListener("start", () => { this.setState({ listening: true }); });
+		recognition.addEventListener("error", () => { this.setState({ listening: false }); });
+
+		recognition.addEventListener(
+			"end",
+			() => {
+				this.setState({ listening: false });
+
+				// Chrome sometimes fires an "end" event without an "error" or "result",
+				// for example it often happens when I say "d". Track whether we're waiting
+				// for a result, and reprompt if we end prematurely.
+				// https://bugs.chromium.org/p/chromium/issues/detail?id=428873
+				if (this.waiting_for_input && this.page_focused) {
+					this.set_transcript("Error talking to speech API", 3000);
+					this.speak({ text: "Sorry, say that again?", prompt: true });
+				}
+			}
+		);
+
+		if (this.debug) {
+			recognition.addEventListener("start", console.log.bind(console, "recognition start"));
+			recognition.addEventListener("end", console.log.bind(console, "recognition end"));
+			recognition.addEventListener("error", console.log.bind(console, "recognition error: "));
+			recognition.addEventListener("result", console.log.bind(console, "recognition result: "));
+		}
+
+		this.speech_recognition_instance = recognition;
 	}
 
 	handle_visibility_change(event) {
 		if (event.type === "blur" || document.visibilityState === "hidden") {
-			this.setState({ page_hidden: true });
+			this.page_focused = false;
 			this.pause_listening();
 		} else if (event.type === "focus" || document.visibilityState === "visible") {
-			this.setState({ page_hidden: false });
+			this.page_focused = true;
 			this.resume_listening();
 		}
 	}
@@ -200,8 +229,8 @@ class Game extends React.Component {
 			.then((response) => response.json())
 			.then(
 				(data) => {
-					this.setState({ challenge_pool: data });
-					this.listen_for_input();
+					this.challenge_pool = data;
+					this.setup_speech_recognition();
 					this.set_challenge();
 				}
 			);
@@ -210,7 +239,7 @@ class Game extends React.Component {
 	render() {
 		return React.createElement(
 			"div", null,
-			this.state.challenge ? React.createElement(ChallengeDisplay, { value: this.state.challenge.value, victory: this.state.victory }) : null,
+			this.state.challenge ? React.createElement(ChallengeDisplay, { value: this.state.challenge.value }) : null,
 			this.state.listening ? React.createElement(ListeningIndicator) : null,
 			this.state.transcript ? React.createElement(Transcript, { transcript: this.state.transcript }) : null,
 			this.state.victory ? React.createElement(Fireworks) : null
