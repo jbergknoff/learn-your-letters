@@ -17,7 +17,8 @@ const ChallengeDisplay = (props) => {
 		alignItems: "center",
 		justifyContent: "center",
 		fontSize: "30em",
-		color: props.victory ? "blue" : "black"
+		background: "slategrey",
+		color: "white"
 	};
 
 	return React.createElement("div", { style: styles }, props.value);
@@ -41,28 +42,12 @@ class Transcript extends React.Component {
 	}
 }
 
-class Smiley extends React.Component {
-	shouldComponentUpdate() {
-		return false;
-	}
-
-	render() {
-		const timeout_ms = 2000;
-		const horizontal = Math.random() < 0.5;
-		const scroll_animation = `${horizontal ? "horizontal" : "vertical" }-scroll ${timeout_ms}ms linear ${Math.random() < 0.5 ? "reverse" : "" }`;
-		const rotate_animation = `rotate ${timeout_ms}ms linear`;
-
-		const styles = {
-			position: "fixed",
-			top: horizontal ? `${10 + ~~(80 * Math.random())}%` : "120%",
-			left: horizontal ? "-20%" : `${10 + ~~(80 * Math.random())}%`,
-			fontSize: "12em",
-			color: random_choice([ "red", "green", "coral", "brown", "springgreen" ]),
-			animation: `${scroll_animation}, ${rotate_animation}`
-		};
-
-		return React.createElement("div", { style: styles }, "\u{1F603}");
-	}
+const Fireworks = () => {
+	return React.createElement(
+		"div", { className: "pyro" },
+		React.createElement("div", { className: "before" }),
+		React.createElement("div", { className: "after" })
+	);
 };
 
 const ListeningIndicator = () => {
@@ -175,10 +160,10 @@ class Game extends React.Component {
 		}
 
 		const example = this.state.challenge.examples ? ` for ${random_choice(this.state.challenge.examples)}` : "";
-		const congratulations = [ "great", "well done", "good job", "way to go", "perfect", "that's right" ]
+		const congratulations = [ "great", "well done", "good job", "way to go", "perfect", "that's right" ];
 		this.speak(
 			{ text: `${random_choice(congratulations)}! It's ${this.state.challenge.value}${example}`, pitch: 1.1 },
-			setTimeout.bind(null, this.set_challenge.bind(this), 300)
+			setTimeout.bind(null, this.set_challenge.bind(this), 1000)
 		);
 
 		this.setState({ victory: true });
@@ -228,7 +213,7 @@ class Game extends React.Component {
 			this.state.challenge ? React.createElement(ChallengeDisplay, { value: this.state.challenge.value, victory: this.state.victory }) : null,
 			this.state.listening ? React.createElement(ListeningIndicator) : null,
 			this.state.transcript ? React.createElement(Transcript, { transcript: this.state.transcript }) : null,
-			this.state.victory ? [ 1, 2, 3 ].map(() => React.createElement(Smiley)) : null
+			this.state.victory ? React.createElement(Fireworks) : null
 		);
 	}
 }
