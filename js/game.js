@@ -21,7 +21,7 @@ const ChallengeDisplay = (props) => {
 		color: "white"
 	};
 
-	return React.createElement("div", { style: styles }, props.value);
+	return React.createElement("div", { className: "no-pointer-events", style: styles }, props.value);
 };
 
 class Transcript extends React.Component {
@@ -38,7 +38,7 @@ class Transcript extends React.Component {
 			animation: `fade-out ${this.props.transcript.timeout_ms}ms ease`
 		};
 
-		return React.createElement("div", { style: styles }, this.props.transcript.text);
+		return React.createElement("div", { className: "no-pointer-events", style: styles }, this.props.transcript.text);
 	}
 }
 
@@ -52,9 +52,27 @@ const Fireworks = () => {
 
 const ListeningIndicator = () => {
 	return React.createElement(
-		"div", { style: { position: "absolute", top: "1em", right: "1em", textAlign: "center" } },
+		"div", { className: "no-pointer-events", style: { position: "absolute", top: "1em", right: "1em", textAlign: "center" } },
 		React.createElement("div", { style: { fontSize: "6em" } }, "\u{1F399}"),
 		React.createElement("div", null, "Listening")
+	);
+};
+
+const Links = () => {
+	return React.createElement(
+		"div", { style: { position: "absolute", bottom: "1em", right: "1em" } },
+		React.createElement(
+			"span", { style: { fontSize: "3em" } },
+			React.createElement(
+				"a", { href: "https://github.com/jbergknoff/learn-your-letters" },
+				React.createElement("i", { className: "fa fa-github" })
+			),
+			React.createElement("span", null, " "),
+			React.createElement(
+				"a", { href: "https://twitter.com/intent/tweet?text=https://goo.gl/M9DKMT%20Learn%20Your%20Letters:%20a%20game%20for%20toddlers%20by%20@jbergknoff" },
+				React.createElement("i", { className: "fa fa-twitter" })
+			)
+		)
 	);
 };
 
@@ -63,7 +81,7 @@ class Game extends React.Component {
 		super()
 
 		// These are internal state that don't directly affect the UI.
-		this.debug = true;
+		this.debug = false;
 		this.speech_recognition_instance = null;
 		this.challenge_pool = [];
 		this.waiting_for_input = false; // True if we're waiting for a challenge response
@@ -195,7 +213,8 @@ class Game extends React.Component {
 				// https://bugs.chromium.org/p/chromium/issues/detail?id=428873
 				if (this.waiting_for_input && this.page_focused) {
 					this.set_transcript("Error talking to speech API", 3000);
-					this.speak({ text: "Sorry, say that again?", prompt: true });
+					const error_responses = [ "Sorry, say that again?", `Try saying "it's a blank"` ];
+					this.speak({ text: random_choice(error_responses), prompt: true });
 				}
 			}
 		);
@@ -205,6 +224,7 @@ class Game extends React.Component {
 			recognition.addEventListener("end", console.log.bind(console, "recognition end"));
 			recognition.addEventListener("error", console.log.bind(console, "recognition error: "));
 			recognition.addEventListener("result", console.log.bind(console, "recognition result: "));
+			recognition.addEventListener("speechend", console.log.bind(console, "recognition speechend"));
 		}
 
 		this.speech_recognition_instance = recognition;
@@ -241,6 +261,7 @@ class Game extends React.Component {
 			"div", null,
 			this.state.challenge ? React.createElement(ChallengeDisplay, { value: this.state.challenge.value }) : null,
 			this.state.listening ? React.createElement(ListeningIndicator) : null,
+			React.createElement(Links),
 			this.state.transcript ? React.createElement(Transcript, { transcript: this.state.transcript }) : null,
 			this.state.victory ? React.createElement(Fireworks) : null
 		);
