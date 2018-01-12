@@ -193,13 +193,13 @@
 					() => {
 						this.setState({ listening: false });
 
-						// Chrome sometimes fires an "end" event without an "error" or "result",
+						// Chrome sometimes fires an "end" event without an "error" or "result" or "nomatch",
 						// for example it often happens when I say "d". Track whether we're waiting
 						// for a result, and reprompt if we end prematurely.
 						// https://bugs.chromium.org/p/chromium/issues/detail?id=428873
 						if (this.waiting_for_input && this.page_focused) {
-							this.set_transcript("Error talking to speech API", 3000);
-							const error_responses = [ "Sorry, say that again?", `Try saying "it's a blank"` ];
+							this.set_transcript("No response from speech API", 3000);
+							const error_responses = [ "I didn't catch that", "Sorry, say that again?", `Try saying "it's a blank"` ];
 							this.speak({ text: random_choice(error_responses), prompt: true });
 						}
 					}
@@ -211,7 +211,7 @@
 					recognition.addEventListener("error", console.log.bind(console, "recognition error: "));
 					recognition.addEventListener("result", console.log.bind(console, "recognition result: "));
 					recognition.addEventListener("speechend", console.log.bind(console, "recognition speechend"));
-					// TODO couldn't parse speech event?
+					recognition.addEventListener("nomatch", console.log.bind(console, "recognition nomatch"));
 				}
 
 				this.speech_recognition_instance = recognition;
