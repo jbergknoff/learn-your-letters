@@ -10,9 +10,9 @@ The Chrome speech synthesis and recognition APIs both use remote APIs, so they d
 
 ## Development
 
-Refer to development_server.py to generate a self-signed TLS certificate. Then run `python development_server.py` and navigate to https://localhost:4443 in a browser.
-
 `SpeechRecognition` is only enabled on TLS-enabled pages.
+
+Refer to the instructions in development_server.py to generate a self-signed TLS certificate. Then run `python development_server.py` and navigate to https://localhost:4443 in a browser.
 
 ## Deployment
 

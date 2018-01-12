@@ -13,10 +13,17 @@
 <div id="main"></div>
 <script type="text/javascript" src="./js/game.js"></script>
 <script type="text/javascript">
-ReactDOM.render(
-	React.createElement(Game),
-	document.getElementById("main")
-);
+(
+	function() {
+		const speech_synthesis_supported = window.speechSynthesis && window.SpeechSynthesisUtterance;
+		const speech_recognition_supported = window.SpeechRecognition || window.webkitSpeechRecognition;
+		if (!(speech_synthesis_supported && speech_recognition_supported)) {
+			return ReactDOM.render(React.createElement(window.components.BrowserNotSupportedMessage), document.getElementById("main"));
+		}
+
+		ReactDOM.render(React.createElement(window.components.Game), document.getElementById("main"));
+	}
+)();
 </script>
 </body>
 </html>
