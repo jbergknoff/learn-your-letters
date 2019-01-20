@@ -86,7 +86,7 @@
 	},
 	{
 		"value": "R",
-		"voice_aliases": [ "r", "are" ],
+		"voice_aliases": [ "r", "are", "ar" ],
 		"examples": [ "rainbow", "red" ]
 	},
 	{
