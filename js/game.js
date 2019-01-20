@@ -230,6 +230,7 @@
 
 			react_to_initial_prompt(event) {
 				this.setState({ initial_prompt: false });
+				this.set_challenge();
 			}
 
 			componentDidMount() {
@@ -243,7 +244,6 @@
 						(data) => {
 							this.challenge_pool = data;
 							this.setup_speech_recognition();
-							this.set_challenge();
 						}
 					);
 			}
