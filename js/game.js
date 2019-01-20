@@ -75,6 +75,7 @@
 
 				// These are elements of state which directly affect the UI.
 				this.state = {
+					initial_prompt: true, // Show the initial prompt (required for speech synthesis)
 					challenge: null, // The challenge currently being displayed
 					listening: false, // True if microphone is on
 					transcript: null, // Populated when showing a speech recognition transcript
@@ -227,6 +228,10 @@
 				}
 			}
 
+			react_to_initial_prompt(event) {
+				this.setState({ initial_prompt: false });
+			}
+
 			componentDidMount() {
 				document.addEventListener("visibilitychange", this.handle_visibility_change.bind(this));
 				window.addEventListener("blur", this.handle_visibility_change.bind(this));
@@ -244,6 +249,13 @@
 			}
 
 			render() {
+				if (this.state.initial_prompt) {
+					return React.createElement(
+						"button", { onClick: this.react_to_initial_prompt.bind(this) },
+						"click to start"
+					);
+				}
+
 				return React.createElement(
 					"div", null,
 					this.state.challenge && React.createElement(ChallengeDisplay, { value: this.state.challenge.value }),
